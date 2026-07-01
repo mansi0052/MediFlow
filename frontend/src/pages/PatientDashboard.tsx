@@ -1,16 +1,9 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/Toast';
 import { Card, SectionTitle, Button, Badge } from '../components/UI';
 import { useSocket } from '../components/useSocket';
-
-const api = axios.create({ baseURL: '/api' });
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('mediflow:token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+import api from '../api';
 
 interface Doctor {
   _id: string;

@@ -1,11 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import axios from 'axios';
+import api from '../api';
 
 interface User { id: string; name: string; email: string; role: string; }
 interface AuthContextValue { user: User | null; loading: boolean; login: (email: string, password: string) => Promise<User>; register: (payload: Record<string, unknown>) => Promise<User>; logout: () => Promise<void>; }
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
-
-const api = axios.create({ baseURL: '/api' });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

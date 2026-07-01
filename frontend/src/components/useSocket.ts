@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { API_BASE_URL } from '../api';
 
 export function useSocket(onEvent: (event: string, payload: unknown) => void, events: string[]) {
   const socketRef = useRef<Socket | null>(null);
@@ -8,7 +9,7 @@ export function useSocket(onEvent: (event: string, payload: unknown) => void, ev
     const token = localStorage.getItem('mediflow:token');
     if (!token) return;
 
-    const socket = io('/', {
+    const socket = io(API_BASE_URL || '/', {
       path: '/socket.io',
       auth: { token }
     });
