@@ -52,6 +52,7 @@ export default function PatientDashboard() {
   const [reportFile, setReportFile] = useState<File | null>(null);
   const [reportType, setReportType] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [deletingReportId, setDeletingReportId] = useState<string | null>(null);
 
   const [booking, setBooking] = useState<Doctor | null>(null);
   const [date, setDate] = useState('');
@@ -84,7 +85,8 @@ export default function PatientDashboard() {
     if (user?.id) loadAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
-useSocket(
+
+  useSocket(
     (event) => {
       if (event === 'appointment:statusChanged') {
         showToast('An appointment was updated', 'info');
@@ -97,7 +99,7 @@ useSocket(
     ['appointment:statusChanged', 'prescription:created']
   );
 
-const uploadReport = async () => {
+  const uploadReport = async () => {
     if (!reportFile || !reportType.trim()) {
       showToast('Please choose a file and enter a report type', 'error');
       return;
@@ -128,6 +130,21 @@ const uploadReport = async () => {
     setDate('');
     setTimeSlot('');
     setNotes('');
+  };
+
+  const deleteReport = async (reportId: string) => {
+    if (!window.confirm('Delete this report? This cannot be undone.')) return;
+    setDeletingReportId(reportId);
+    try {
+      await api.delete(`/reports/${reportId}`);
+      showToast('Report deleted', 'success');
+      await loadAll();
+    } catch (err: any) {
+      console.error('Failed to delete report', err);
+      showToast(err?.response?.data?.message || 'Failed to delete report', 'error');
+    } finally {
+      setDeletingReportId(null);
+    }
   };
 
   const submitBooking = async () => {
@@ -261,9 +278,18 @@ const uploadReport = async () => {
                       <p className="text-slate-700 font-medium">{report.type}</p>
                       <p className="text-xs text-slate-400">{new Date(report.createdAt).toLocaleDateString()}</p>
                     </div>
-                    <a href={report.fileUrl} target="_blank" rel="noreferrer" className="text-sage-600 text-sm font-medium">
-                      View
-                    </a>
+                    <div className="flex items-center gap-3">
+                      <a href={report.fileUrl} target="_blank" rel="noreferrer" className="text-sage-600 text-sm font-medium">
+                        View
+                      </a>
+                      <button
+                        disabled={deletingReportId === report._id}
+                        onClick={() => deleteReport(report._id)}
+                        className="text-coral-500 text-sm font-medium hover:text-coral-600 disabled:opacity-50"
+                      >
+                        {deletingReportId === report._id ? 'Deleting...' : 'Delete'}
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>
