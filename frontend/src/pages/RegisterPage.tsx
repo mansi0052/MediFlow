@@ -5,7 +5,7 @@ import { useToast } from '../components/Toast';
 import { Button } from '../components/UI';
 
 export default function RegisterPage() {
-  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'patient' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'patient', specialization: '' });
   const [submitting, setSubmitting] = useState(false);
   const { register } = useAuth();
   const { showToast } = useToast();
@@ -48,12 +48,21 @@ export default function RegisterPage() {
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
         <select
-          className="w-full border border-sage-100 rounded-xl p-2.5 mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-sage-400"
+          className="w-full border border-sage-100 rounded-xl p-2.5 mb-3 text-sm focus:outline-none focus:ring-2 focus:ring-sage-400"
+          value={form.role}
           onChange={(e) => setForm({ ...form, role: e.target.value })}
         >
           <option value="patient">Patient</option>
           <option value="doctor">Doctor</option>
         </select>
+        {form.role === 'doctor' && (
+          <input
+            className="w-full border border-sage-100 rounded-xl p-2.5 mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-sage-400"
+            placeholder="Specialization (e.g. Cardiology)"
+            value={form.specialization}
+            onChange={(e) => setForm({ ...form, specialization: e.target.value })}
+          />
+        )}
         <Button type="submit" disabled={submitting} className="w-full justify-center">
           {submitting ? 'Creating account...' : 'Register'}
         </Button>
