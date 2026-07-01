@@ -27,5 +27,20 @@ MediFlow is a role-based healthcare management platform with doctor, patient, an
 - Doctor: `doctor@mediflow.local` / `doctor123`
 - Patient: `patient@mediflow.local` / `patient123`
 
+## Screenshots
+
+### Login
+![Login](./screenshots/login.png)
+
+### Patient Dashboard
+![Patient Dashboard](./screenshots/patient-dashboard.png)
+
+### Doctor Dashboard
+![Doctor Dashboard](./screenshots/doctor-dashboard.png)
+
+### Admin Dashboard
+![Admin Dashboard](./screenshots/admin-dashboard.png)
+
+
 ## API overview
 The backend exposes auth, patient, doctor, admin, appointment, prescription, and report endpoints under `/api`.
