@@ -14,6 +14,13 @@ interface Appointment {
   patientId: { _id: string; name: string; email: string };
 }
 
+interface Report {
+  _id: string;
+  fileUrl: string;
+  type: string;
+  createdAt: string;
+}
+
 const statusTone = (status: string): 'default' | 'success' | 'warning' | 'danger' => {
   if (status === 'pending') return 'warning';
   if (status === 'confirmed') return 'success';
@@ -31,6 +38,10 @@ export default function DoctorDashboard() {
   const [medicineText, setMedicineText] = useState('');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
+
+  const [viewingReportsFor, setViewingReportsFor] = useState<Appointment | null>(null);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [reportsLoading, setReportsLoading] = useState(false);
 
   const loadAppointments = async () => {
     setLoading(true);
@@ -70,6 +81,20 @@ export default function DoctorDashboard() {
       showToast('Failed to update appointment', 'error');
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+ const viewReports = async (appt: Appointment) => {
+    setViewingReportsFor(appt);
+    setReportsLoading(true);
+    try {
+      const { data } = await api.get(`/reports/patient/${appt.patientId._id}`);
+      setReports(data.reports);
+    } catch (err) {
+      console.error('Failed to load reports', err);
+      showToast('Failed to load reports', 'error');
+    } finally {
+      setReportsLoading(false);
     }
   };
 
@@ -175,6 +200,9 @@ export default function DoctorDashboard() {
                         Write Prescription
                       </Button>
                     )}
+                    <Button variant="ghost" onClick={() => viewReports(appt)}>
+                      View Reports
+                    </Button>
                   </div>
                 </li>
               ))}
@@ -209,6 +237,38 @@ export default function DoctorDashboard() {
               <Button disabled={saving} onClick={submitPrescription}>
                 {saving ? 'Saving...' : 'Save Prescription'}
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {viewingReportsFor && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6">
+            <h2 className="font-display font-semibold text-lg text-sage-600 mb-3">
+              Reports for {viewingReportsFor.patientId?.name}
+            </h2>
+            {reportsLoading ? (
+              <p className="text-sm text-slate-400">Loading...</p>
+            ) : reports.length === 0 ? (
+              <p className="text-sm text-slate-400">No reports uploaded yet.</p>
+            ) : (
+              <ul className="space-y-2 mb-4">
+                {reports.map((report) => (
+                  <li key={report._id} className="border border-sage-100 rounded-xl p-3 text-sm flex justify-between items-center">
+                    <div>
+                      <p className="text-slate-700 font-medium">{report.type}</p>
+                      <p className="text-xs text-slate-400">{new Date(report.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <a href={report.fileUrl} target="_blank" rel="noreferrer" className="text-sage-600 text-sm font-medium">
+                      View
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="flex justify-end">
+              <Button variant="ghost" onClick={() => setViewingReportsFor(null)}>Close</Button>
             </div>
           </div>
         </div>
